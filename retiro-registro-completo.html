@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retiro Espiritual Familiar 2026</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: #f6f9f7; min-height: 100vh; }
+
+    /* ── REGISTRO ── */
+    .registro-screen { display: block; }
+    .admin-screen { display: none; }
+    .login-screen { display: none; min-height:100vh; background:#0a2218; align-items:center; justify-content:center; padding:24px; }
+
+    .reg-header {
+      background: linear-gradient(135deg, #0a2218 0%, #1a4a30 100%);
+      padding: 36px 20px 48px;
+      text-align: center;
+      border-bottom: 3px solid #c9a84c;
+    }
+    .reg-header-icon { font-size:2.8rem; margin-bottom:8px; }
+    .reg-tag { display:inline-block; background:#c9a84c; color:#0a2218; font-size:0.7rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; padding:4px 14px; border-radius:20px; margin-bottom:12px; }
+    .reg-header h1 { font-family:'Playfair Display',serif; font-size:1.9rem; color:#f5f0e8; margin-bottom:4px; }
+    .reg-header h1 span { color:#c9a84c; }
+    .reg-header-sub { color:#a0c4b0; font-size:0.83rem; font-weight:600; margin-bottom:16px; }
+    .detail-chips { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:14px; }
+    .chip { background:rgba(255,255,255,0.08); border:1px solid rgba(201,168,76,0.4); color:#f5f0e8; padding:5px 12px; border-radius:20px; font-size:0.78rem; font-weight:600; }
+    .admin-link-btn { display:inline-block; margin-top:14px; color:#c9a84c; font-size:0.75rem; font-weight:700; cursor:pointer; text-decoration:underline; background:none; border:none; font-family:'Nunito',sans-serif; }
+
+    .reg-main { max-width:540px; margin:-18px auto 0; padding:0 16px 40px; }
+    .form-card { background:#fff; border-radius:16px; box-shadow:0 8px 40px rgba(0,0,0,0.2); overflow:hidden; }
+    .form-section { padding:22px 22px 0; }
+    .section-title { font-size:0.73rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2d7a4f; margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid #d8f3dc; }
+    .form-group { margin-bottom:14px; }
+    label { display:block; font-size:0.8rem; font-weight:700; color:#1a3a2e; margin-bottom:4px; }
+    .req { color:#e63946; }
+    input[type="text"], input[type="tel"] { width:100%; padding:11px 14px; border:2px solid #e0e8e4; border-radius:10px; font-family:'Nunito',sans-serif; font-size:0.9rem; color:#1a3a2e; outline:none; transition:border-color 0.2s; }
+    input:focus { border-color:#2d7a4f; box-shadow:0 0 0 3px rgba(45,122,79,0.12); }
+
+    .counter-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+    .counter-card { background:#f6f9f7; border:2px solid #e0e8e4; border-radius:12px; padding:12px 10px; text-align:center; transition:border-color 0.2s; }
+    .counter-card:focus-within { border-color:#2d7a4f; }
+    .counter-label { font-size:0.75rem; font-weight:800; color:#2d7a4f; text-transform:uppercase; letter-spacing:0.04em; }
+    .counter-sub { font-size:0.65rem; color:#9ab5a8; margin:2px 0 8px; font-weight:600; }
+    .counter-controls { display:flex; align-items:center; justify-content:center; gap:10px; }
+    .counter-btn { width:32px; height:32px; border-radius:50%; border:2px solid #2d7a4f; background:#fff; color:#2d7a4f; font-size:1.1rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+    .counter-btn:hover { background:#2d7a4f; color:#fff; }
+    .counter-num { font-size:1.4rem; font-weight:800; color:#1a3a2e; min-width:26px; }
+
+    .total-bar { background:linear-gradient(135deg,#1a4a30,#0a2218); margin:0 22px 18px; border-radius:12px; padding:13px 18px; display:flex; align-items:center; justify-content:space-between; }
+    .total-label { color:#a0c4b0; font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+    .total-num { font-size:1.7rem; font-weight:800; color:#c9a84c; }
+    .total-sub { color:#a0c4b0; font-size:0.73rem; font-weight:600; }
+
+    .submit-area { padding:0 22px 26px; }
+    .btn-submit { width:100%; padding:15px; background:#2d7a4f; color:#fff; border:none; border-radius:12px; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:800; cursor:pointer; transition:background 0.2s; }
+    .btn-submit:hover { background:#0a2218; }
+    .btn-submit:disabled { background:#9ab5a8; cursor:not-allowed; }
+
+    .error-msg { background:#fff0f0; color:#c0392b; border:2px solid #e74c3c; border-radius:10px; padding:10px 14px; font-size:0.82rem; font-weight:700; margin:0 22px 12px; display:none; }
+
+    .success-screen { display:none; text-align:center; padding:44px 22px; }
+    .success-icon { font-size:3.5rem; margin-bottom:14px; }
+    .success-screen h2 { font-family:'Playfair Display',serif; font-size:1.5rem; color:#1a3a2e; margin-bottom:8px; }
+    .success-screen p { color:#4a6a5e; font-size:0.88rem; line-height:1.6; margin-bottom:18px; }
+    .btn-new { padding:12px 26px; background:#2d7a4f; color:#fff; border:none; border-radius:10px; font-family:'Nunito',sans-serif; font-size:0.88rem; font-weight:800; cursor:pointer; }
+
+    .reg-footer { text-align:center; margin-top:20px; color:#4a9e6a; font-size:0.76rem; font-weight:600; padding-bottom:20px; }
+
+    /* ── LOGIN ── */
+    .login-box { background:#fff; border-radius:16px; padding:36px 28px; width:100%; max-width:360px; box-shadow:0 24px 80px rgba(0,0,0,0.4); text-align:center; }
+    .login-box .icon { font-size:2.4rem; margin-bottom:10px; }
+    .login-box h2 { font-family:'Playfair Display',serif; font-size:1.3rem; color:#0a2218; margin-bottom:6px; }
+    .login-box p { font-size:0.8rem; color:#4a6a5e; margin-bottom:20px; }
+    .login-box input[type="password"] { width:100%; padding:12px; border:2px solid #e0e8e4; border-radius:10px; font-family:'Nunito',sans-serif; font-size:1rem; outline:none; margin-bottom:10px; text-align:center; letter-spacing:0.15em; }
+    .login-box input:focus { border-color:#2d7a4f; }
+    .login-error { color:#e63946; font-size:0.8rem; font-weight:700; margin-bottom:10px; display:none; }
+    .btn-login { width:100%; padding:13px; background:#2d7a4f; color:#fff; border:none; border-radius:10px; font-family:'Nunito',sans-serif; font-size:0.95rem; font-weight:800; cursor:pointer; margin-bottom:10px; }
+    .btn-back-link { background:none; border:none; color:#9ab5a8; font-size:0.78rem; font-family:'Nunito',sans-serif; cursor:pointer; text-decoration:underline; }
+
+    /* ── ADMIN ── */
+    .admin-header { background:#0a2218; color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid #c9a84c; }
+    .admin-title { font-family:'Playfair Display',serif; font-size:1rem; color:#c9a84c; }
+    .admin-sub { font-size:0.7rem; color:#a0c4b0; font-weight:600; }
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:10px; border:none; cursor:pointer; font-family:'Nunito',sans-serif; font-size:0.85rem; font-weight:800; transition:all 0.2s; }
+    .btn--primary { background:#2d7a4f; color:#fff; }
+    .btn--primary:hover { background:#0a2218; }
+    .btn--outline { background:transparent; border:2px solid #2d7a4f; color:#2d7a4f; }
+    .btn--outline:hover { background:#2d7a4f; color:#fff; }
+    .btn--danger { background:#fff0f0; color:#e63946; border:2px solid transparent; }
+    .btn--danger:hover { background:#e63946; color:#fff; }
+    .btn--sm { padding:6px 12px; font-size:0.78rem; }
+    .btn--ghost { background:none; border:none; color:#a0c4b0; font-size:0.78rem; font-family:'Nunito',sans-serif; cursor:pointer; text-decoration:underline; }
+
+    .admin-main { max-width:1000px; margin:0 auto; padding:20px 16px 40px; }
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-bottom:20px; }
+    .stat-card { background:#fff; border-radius:12px; padding:18px 14px; box-shadow:0 2px 8px rgba(26,58,46,0.08); border-top:4px solid #2d7a4f; text-align:center; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:2rem; color:#0a2218; line-height:1; }
+    .stat-lbl { font-size:0.7rem; color:#4a6a5e; margin-top:5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+
+    .actions-bar { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center; }
+
+    .table-card { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(26,58,46,0.08); overflow:hidden; }
+    .table-hdr { padding:14px 18px; border-bottom:1px solid #e0e8e4; display:flex; align-items:center; justify-content:space-between; }
+    .table-hdr h3 { font-family:'Playfair Display',serif; font-size:0.95rem; color:#0a2218; }
+    .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.7rem; font-weight:800; background:#d8f3dc; color:#0a2218; }
+    .badge--gold { background:#c9a84c; color:#0a2218; }
+
+    table { width:100%; border-collapse:collapse; }
+    thead tr { background:#0a2218; }
+    thead th { padding:11px 14px; text-align:left; font-size:0.72rem; font-weight:800; color:#c9a84c; text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; }
+    tbody tr { border-bottom:1px solid #f0f4f1; transition:background 0.15s; }
+    tbody tr:hover { background:#f6f9f7; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody td { padding:11px 14px; font-size:0.83rem; color:#1a3a2e; }
+    .total-row { background:#f0f4f1 !important; font-weight:800; }
+
+    .empty-state { text-align:center; padding:44px 24px; color:#9ab5a8; }
+    .empty-icon { font-size:2.8rem; margin-bottom:10px; }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#0a2218; color:#fff; padding:12px 24px; border-radius:30px; font-weight:700; font-size:0.88rem; z-index:999; display:none; box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+
+    @media (max-width:500px) {
+      .reg-header h1 { font-size:1.6rem; }
+      table { display:block; overflow-x:auto; }
+      .stat-grid { grid-template-columns:1fr 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== REGISTRO ===== -->
+<div class="registro-screen" id="registroScreen">
+  <div class="reg-header">
+    <div class="reg-header-icon">⛺</div>
+    <div class="reg-tag">Retiro Espiritual Familiar · 2026</div>
+    <h1>Juntos en <span>Cada Etapa</span></h1>
+    <div class="reg-header-sub">Iglesia Bautista Emanuel · Oklahoma City</div>
+    <div class="detail-chips">
+      <span class="chip">📍 Falls Creek · Davis, OK</span>
+      <span class="chip">📅 Septiembre 6 y 7</span>
+      <span class="chip">🕓 Dom 4:00 pm → Lun 2:00 pm</span>
+    </div>
+    <br/>
+    <button class="admin-link-btn" onclick="showLogin()">🔐 Acceso admin</button>
+  </div>
+
+  <div class="reg-main">
+    <div class="form-card">
+
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon">✅</div>
+        <h2>¡Registro recibido!</h2>
+        <p>Gracias por registrarse para el Retiro Espiritual Familiar 2026.<br/>Nos vemos en Falls Creek. 🙏</p>
+        <button class="btn-new" onclick="resetForm()">Registrar otra familia</button>
+      </div>
+
+      <div id="formContent">
+        <div class="form-section">
+          <div class="section-title">👤 Representante de la familia</div>
+          <div class="form-group">
+            <label>Nombre completo <span class="req">*</span></label>
+            <input type="text" id="familyName" placeholder="Nombre y apellido" />
+          </div>
+          <div class="form-group">
+            <label>Teléfono <span class="req">*</span></label>
+            <input type="tel" id="familyPhone" placeholder="(405) 000-0000" />
+          </div>
+        </div>
+
+        <div class="form-section" style="padding-top:18px">
+          <div class="section-title">👨‍👩‍👧‍👦 ¿Cuántos asisten?</div>
+          <div class="counter-grid">
+            <div class="counter-card">
+              <div class="counter-label">Adultos</div>
+              <div class="counter-sub">&nbsp;</div>
+              <div class="counter-controls">
+                <button class="counter-btn" onclick="change('adults',-1)">−</button>
+                <div class="counter-num" id="adults-display">0</div>
+                <button class="counter-btn" onclick="change('adults',1)">+</button>
+              </div>
+            </div>
+            <div class="counter-card">
+              <div class="counter-label">Solteros</div>
+              <div class="counter-sub">Mayores de 18</div>
+              <div class="counter-controls">
+                <button class="counter-btn" onclick="change('singles',-1)">−</button>
+                <div class="counter-num" id="singles-display">0</div>
+                <button class="counter-btn" onclick="change('singles',1)">+</button>
+              </div>
+            </div>
+            <div class="counter-card">
+              <div class="counter-label">Adolescentes</div>
+              <div class="counter-sub">12 – 17 años</div>
+              <div class="counter-controls">
+                <button class="counter-btn" onclick="change('teens',-1)">−</button>
+                <div class="counter-num" id="teens-display">0</div>
+                <button class="counter-btn" onclick="change('teens',1)">+</button>
+              </div>
+            </div>
+            <div class="counter-card">
+              <div class="counter-label">Niños</div>
+              <div class="counter-sub">Menores de 12</div>
+              <div class="counter-controls">
+                <button class="counter-btn" onclick="change('kids',-1)">−</button>
+                <div class="counter-num" id="kids-display">0</div>
+                <button class="counter-btn" onclick="change('kids',1)">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="total-bar">
+            <div>
+              <div class="total-label">Total de personas</div>
+              <div class="total-sub">que asistirán al retiro</div>
+            </div>
+            <div class="total-num" id="totalDisplay">0</div>
+          </div>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="submit-area">
+          <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+            📨 Confirmar registro / Register
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="reg-footer">Iglesia Bautista Emanuel OKC · Retiro Familiar 2026<br/>Eclesiastés 3:15</div>
+  </div>
+</div>
+
+<!-- ===== LOGIN ADMIN ===== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="icon">🔐</div>
+    <h2>Acceso Admin</h2>
+    <p>Retiro Familiar 2026 — Solo líderes de Emanuel</p>
+    <input type="password" id="pinInput" placeholder="Contraseña" onkeydown="if(event.key==='Enter')checkPin()" />
+    <div class="login-error" id="pinError">Contraseña incorrecta</div>
+    <button class="btn-login" onclick="checkPin()">Entrar</button>
+    <button class="btn-back-link" onclick="showRegistro()">← Volver al registro</button>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div class="admin-screen" id="adminScreen">
+  <header class="admin-header">
+    <div>
+      <div class="admin-title">⛺ Retiro Familiar 2026 — Admin</div>
+      <div class="admin-sub">Juntos en Cada Etapa · Falls Creek</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn--ghost" onclick="showRegistro()">← Registro</button>
+      <button class="btn btn--outline btn--sm" onclick="showLogin()">🚪 Salir</button>
+    </div>
+  </header>
+
+  <div class="admin-main">
+    <div class="stat-grid" id="statsGrid"></div>
+    <div class="actions-bar">
+      <button class="btn btn--primary" onclick="loadData()">🔄 Actualizar</button>
+      <button class="btn btn--outline" onclick="exportCSV()">📥 Exportar CSV</button>
+    </div>
+    <div class="table-card">
+      <div class="table-hdr">
+        <h3>Familias registradas</h3>
+        <span class="badge" id="totalBadge">0 familias</span>
+      </div>
+      <div id="tableContent"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── FIREBASE ──
+  const firebaseConfig = {
+    apiKey: "AIzaSyBE2GlWTPqR5cq7gvsB0Ki7cHHUtIQLHbA",
+    authDomain: "youth-camp-emanuel.firebaseapp.com",
+    projectId: "youth-camp-emanuel",
+    storageBucket: "youth-camp-emanuel.firebasestorage.app",
+    messagingSenderId: "859937890504",
+    appId: "1:859937890504:web:e1e1e8bf8bb97b750b85fd"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // ── CONTRASEÑA ADMIN ──
+  const ADMIN_PIN = "Emanuel2026";
+
+  // ── CONTADORES ──
+  const counts = { adults:0, singles:0, teens:0, kids:0 };
+
+  function change(field, delta) {
+    counts[field] = Math.max(0, counts[field] + delta);
+    document.getElementById(field + '-display').textContent = counts[field];
+    updateTotal();
+  }
+
+  function updateTotal() {
+    const t = counts.adults + counts.singles + counts.teens + counts.kids;
+    document.getElementById('totalDisplay').textContent = t;
+  }
+
+  // ── SCREENS ──
+  function showRegistro() {
+    document.getElementById('registroScreen').style.display = 'block';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'none';
+  }
+
+  function showLogin() {
+    document.getElementById('registroScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminScreen').style.display = 'none';
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinError').style.display = 'none';
+  }
+
+  function showAdmin() {
+    document.getElementById('registroScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'block';
+    loadData();
+  }
+
+  // ── LOGIN ──
+  function checkPin() {
+    const val = document.getElementById('pinInput').value.trim();
+    if (val === ADMIN_PIN) {
+      sessionStorage.setItem('retiroAdmin', '1');
+      showAdmin();
+    } else {
+      document.getElementById('pinError').style.display = 'block';
+      document.getElementById('pinInput').value = '';
+      document.getElementById('pinInput').focus();
+    }
+  }
+
+  // Auto-login
+  if (sessionStorage.getItem('retiroAdmin') === '1') showAdmin();
+
+  // ── SUBMIT REGISTRO ──
+  async function submitForm() {
+    const name  = document.getElementById('familyName').value.trim();
+    const phone = document.getElementById('familyPhone').value.trim();
+    const errEl = document.getElementById('errorMsg');
+    errEl.style.display = 'none';
+
+    if (!name) { errEl.textContent = '⚠️ Por favor ingrese su nombre completo.'; errEl.style.display = 'block'; document.getElementById('familyName').focus(); return; }
+    if (!phone) { errEl.textContent = '⚠️ Por favor ingrese su número de teléfono.'; errEl.style.display = 'block'; document.getElementById('familyPhone').focus(); return; }
+    const total = counts.adults + counts.singles + counts.teens + counts.kids;
+    if (total === 0) { errEl.textContent = '⚠️ Por favor indique cuántas personas asistirán.'; errEl.style.display = 'block'; return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+
+    try {
+      await db.collection('retiroFamiliar2026').add({
+        familyName: name, phone,
+        adults: counts.adults, singles: counts.singles, teens: counts.teens, kids: counts.kids,
+        total, createdAt: new Date().toISOString()
+      });
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('successScreen').style.display = 'block';
+      window.scrollTo({ top:0, behavior:'smooth' });
+    } catch(e) {
+      console.error(e);
+      errEl.textContent = '❌ Error al enviar. Por favor intente de nuevo.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = '📨 Confirmar registro / Register';
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('familyName').value = '';
+    document.getElementById('familyPhone').value = '';
+    ['adults','singles','teens','kids'].forEach(f => { counts[f]=0; document.getElementById(f+'-display').textContent='0'; });
+    updateTotal();
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('successScreen').style.display = 'none';
+    document.getElementById('formContent').style.display = 'block';
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('submitBtn').textContent = '📨 Confirmar registro / Register';
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  // ── ADMIN DATA ──
+  let registrations = [];
+
+  async function loadData() {
+    try {
+      const snap = await db.collection('retiroFamiliar2026').orderBy('createdAt','desc').get();
+      registrations = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      renderStats();
+      renderTable();
+    } catch(e) {
+      console.error(e);
+      toast('❌ Error cargando datos');
+    }
+  }
+
+  function renderStats() {
+    const adults  = registrations.reduce((s,r)=>s+(r.adults||0),0);
+    const singles = registrations.reduce((s,r)=>s+(r.singles||0),0);
+    const teens   = registrations.reduce((s,r)=>s+(r.teens||0),0);
+    const kids    = registrations.reduce((s,r)=>s+(r.kids||0),0);
+    const people  = adults+singles+teens+kids;
+    const stats = [
+      {num:registrations.length, lbl:'Familias'},
+      {num:people,  lbl:'Total personas'},
+      {num:adults,  lbl:'Adultos'},
+      {num:singles, lbl:'Solteros'},
+      {num:teens,   lbl:'Adolescentes'},
+      {num:kids,    lbl:'Niños'},
+    ];
+    document.getElementById('statsGrid').innerHTML = stats.map(s=>
+      `<div class="stat-card"><div class="stat-num">${s.num}</div><div class="stat-lbl">${s.lbl}</div></div>`
+    ).join('');
+  }
+
+  function renderTable() {
+    document.getElementById('totalBadge').textContent = registrations.length + ' familia' + (registrations.length!==1?'s':'');
+    if (!registrations.length) {
+      document.getElementById('tableContent').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No hay registros aún</p></div>`;
+      return;
+    }
+    const tAdults  = registrations.reduce((s,r)=>s+(r.adults||0),0);
+    const tSingles = registrations.reduce((s,r)=>s+(r.singles||0),0);
+    const tTeens   = registrations.reduce((s,r)=>s+(r.teens||0),0);
+    const tKids    = registrations.reduce((s,r)=>s+(r.kids||0),0);
+    const tTotal   = tAdults+tSingles+tTeens+tKids;
+
+    document.getElementById('tableContent').innerHTML = `<table>
+      <thead><tr>
+        <th>#</th><th>Nombre</th><th>Teléfono</th>
+        <th>Adultos</th><th>Solteros</th><th>Adolescentes</th><th>Niños</th>
+        <th>Total</th><th>Fecha</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${registrations.map((r,i)=>`<tr>
+          <td style="color:#9ab5a8;font-size:0.73rem">${i+1}</td>
+          <td><strong>${esc(r.familyName||'')}</strong></td>
+          <td>${r.phone||''}</td>
+          <td style="text-align:center">${r.adults||0}</td>
+          <td style="text-align:center">${r.singles||0}</td>
+          <td style="text-align:center">${r.teens||0}</td>
+          <td style="text-align:center">${r.kids||0}</td>
+          <td style="text-align:center"><span class="badge">${r.total||0}</span></td>
+          <td style="color:#9ab5a8;font-size:0.73rem">${r.createdAt?new Date(r.createdAt).toLocaleDateString('es-US'):''}</td>
+          <td><button class="btn btn--danger btn--sm" onclick="deleteReg('${r.id}')">🗑️</button></td>
+        </tr>`).join('')}
+        <tr class="total-row">
+          <td colspan="3" style="padding:12px 14px">TOTAL</td>
+          <td style="text-align:center">${tAdults}</td>
+          <td style="text-align:center">${tSingles}</td>
+          <td style="text-align:center">${tTeens}</td>
+          <td style="text-align:center">${tKids}</td>
+          <td style="text-align:center"><span class="badge badge--gold">${tTotal}</span></td>
+          <td colspan="2"></td>
+        </tr>
+      </tbody>
+    </table>`;
+  }
+
+  async function deleteReg(id) {
+    if (!confirm('¿Eliminar este registro?')) return;
+    await db.collection('retiroFamiliar2026').doc(id).delete();
+    registrations = registrations.filter(r=>r.id!==id);
+    renderStats(); renderTable();
+    toast('🗑️ Registro eliminado');
+  }
+
+  function exportCSV() {
+    const headers = ['#','Nombre','Teléfono','Adultos','Solteros','Adolescentes','Niños','Total','Fecha'];
+    const rows = registrations.map((r,i)=>[
+      i+1, r.familyName, r.phone,
+      r.adults||0, r.singles||0, r.teens||0, r.kids||0, r.total||0,
+      r.createdAt?new Date(r.createdAt).toLocaleDateString('es-US'):''
+    ]);
+    rows.push(['','TOTAL','',
+      registrations.reduce((s,r)=>s+(r.adults||0),0),
+      registrations.reduce((s,r)=>s+(r.singles||0),0),
+      registrations.reduce((s,r)=>s+(r.teens||0),0),
+      registrations.reduce((s,r)=>s+(r.kids||0),0),
+      registrations.reduce((s,r)=>s+(r.total||0),0),''
+    ]);
+    const lines = [headers,...rows].map(row=>row.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(','));
+    const blob = new Blob([lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download='retiro-familiar-2026.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.style.display = 'block';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>el.style.display='none', 3000);
+  }
+</script>
+</body>
+</html>
